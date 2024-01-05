@@ -26,13 +26,17 @@ app.get("/test", (req, res) => {
 app.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
 
-  const newUser = await User.create({
-    name,
-    email,
-    password: bcrypt.hashSync(password, bcryptSalt),
-  });
+  try {
+    const newUser = await User.create({
+      name,
+      email,
+      password: bcrypt.hashSync(password, bcryptSalt),
+    });
 
-  res.json(newUser);
+    res.json(newUser);
+  } catch (e) {
+    res.status(422).json(e);
+  }
 });
 
 const PORT = 4000;
