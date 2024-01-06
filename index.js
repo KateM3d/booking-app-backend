@@ -79,6 +79,10 @@ app.get("/profile", (req, res) => {
   }
 });
 
+app.post("/logout", (req, res) => {
+  res.cookie("token", "").json(true);
+});
+
 const PORT = 4000;
 
 app.listen(PORT, () => {
