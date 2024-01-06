@@ -3,12 +3,16 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const User = require("./models/User.js");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
 const bcryptSalt = bcrypt.genSaltSync(10);
+const jwtSecret = "xdcfgvbhjnklhgfhbj";
 
 app.use(
   cors({
@@ -36,6 +40,42 @@ app.post("/register", async (req, res) => {
     res.json(newUser);
   } catch (e) {
     res.status(422).json(e);
+  }
+});
+
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+  const userInfo = await User.findOne({ email: email });
+  if (userInfo) {
+    const passOk = bcrypt.compareSync(password, userInfo.password);
+    if (passOk) {
+      jwt.sign(
+        { email: userInfo.email, id: userInfo._id },
+        jwtSecret,
+        {},
+        (err, token) => {
+          if (err) throw err;
+          res.cookie("token", token).json(userInfo);
+        }
+      );
+    } else {
+      res.status(422).json("password not ok");
+    }
+  } else {
+    res.json("not found");
+  }
+});
+
+app.get("/profile", (req, res) => {
+  const { token } = req.cookies;
+  if (token) {
+    jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+      if (err) throw err;
+      const { name, email, _id } = await User.findById(userData.id);
+      res.json({ name, email, _id });
+    });
+  } else {
+    res.json(null);
   }
 });
 
