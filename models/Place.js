@@ -1,7 +1,7 @@
-const mongoose = requite("mongoose");
+const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
-const PlaceSchema = new Shema({
+const PlaceSchema = new Schema({
   title: String,
   owner: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   address: String,
