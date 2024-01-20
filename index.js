@@ -130,9 +130,13 @@ app.post("/places", (req, res) => {
     maxGuests,
   } = req.body;
   jwt.verify(token, jwtSecret, {}, async (err, userData) => {
-    if (err) throw err;
+    if (err) {
+      console.error("Error verifying token:", err);
 
+      throw err;
+    }
     const placeDoc = await Place.create({
+      owner: userData.id,
       title,
       address,
       addedPhotos,
@@ -142,7 +146,6 @@ app.post("/places", (req, res) => {
       checkin,
       checkout,
       maxGuests,
-      owner: userData.id,
     });
     res.json(placeDoc);
   });
